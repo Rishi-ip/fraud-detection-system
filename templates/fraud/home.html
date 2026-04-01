@@ -1,0 +1,167 @@
+{% extends 'fraud/base.html' %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<div class="text-center mb-10">
+    <h2 class="text-4xl font-bold text-blue-700 mb-3">Credit Card Fraud Detection</h2>
+    <p class="text-gray-500 text-lg">Enter transaction details below and our AI will instantly detect if it's fraud</p>
+</div>
+
+<!-- Form Card -->
+<div class="bg-white rounded-2xl shadow-lg p-8 max-w-2xl mx-auto">
+    <h3 class="text-xl font-bold text-gray-700 mb-6">📋 Transaction Details</h3>
+
+    <form id="fraudForm">
+
+        <!-- Amount and Time -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Amount (₹)</label>
+                <input type="number" id="amount" step="0.01" placeholder="e.g. 149.62"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-600 mb-1">Time (seconds)</label>
+                <input type="number" id="time" placeholder="e.g. 0"
+                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+            </div>
+        </div>
+
+        <!-- V1 to V28 -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-600 mb-2">V1 — V28 Features</label>
+            <div class="grid grid-cols-4 gap-2">
+                {% for i in "12345678901234567890123456789" %}
+                {% endfor %}
+            </div>
+            <div class="grid grid-cols-4 gap-2" id="vfeatures">
+            </div>
+            <p class="text-xs text-gray-400 mt-2">These are the anonymized features provided by the bank dataset</p>
+        </div>
+
+        <!-- Test Buttons -->
+        <div class="flex gap-3 mb-6">
+            <button type="button" onclick="fillSafeTransaction()"
+                class="flex-1 bg-green-100 text-green-700 font-medium py-2 rounded-lg hover:bg-green-200">
+                ✅ Fill Safe Transaction
+            </button>
+            <button type="button" onclick="fillFraudTransaction()"
+                class="flex-1 bg-red-100 text-red-700 font-medium py-2 rounded-lg hover:bg-red-200">
+                🚨 Fill Fraud Transaction
+            </button>
+        </div>
+
+        <!-- Submit -->
+        <button type="button" onclick="submitForm()"
+            class="w-full bg-blue-700 text-white font-bold py-3 rounded-lg hover:bg-blue-800 text-lg">
+            🔍 Check Transaction
+        </button>
+
+    </form>
+
+    <!-- Result Box (hidden by default) -->
+    <div id="result" class="hidden mt-8 p-6 rounded-xl text-center">
+    </div>
+
+</div>
+
+<script>
+    // Generate V1-V28 input fields dynamically
+    const container = document.getElementById('vfeatures');
+    for (let i = 1; i <= 28; i++) {
+        const div = document.createElement('div');
+        div.innerHTML = `
+            <label class="block text-xs text-gray-500">V${i}</label>
+            <input type="number" id="v${i}" step="0.000001" placeholder="0.0"
+                class="w-full border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-300">
+        `;
+        container.appendChild(div);
+    }
+
+    // Fill safe transaction (first row from dataset)
+    function fillSafeTransaction() {
+        document.getElementById('amount').value = 149.62;
+        document.getElementById('time').value = 0;
+        const safeValues = [-1.3598071336738,-0.0727811733098497,2.53634673796914,1.37815522427443,
+            -0.338320769942518,0.462387777762292,0.239598554061257,0.0986979012610507,0.363786969611213,
+            0.0907941719789316,-0.551599533260813,-0.617800855762348,-0.991389847235408,-0.311169353699879,
+            1.46817697209427,-0.470400525259478,0.207971241929242,0.0257905801985591,0.403992960255733,
+            0.251412098239705,-0.018306777944153,0.277837575558899,-0.110473910188767,0.0669280749146731,
+            0.128539358273528,-0.189114843888824,0.133558376740387,-0.0210530534538215];
+        safeValues.forEach((val, idx) => {
+            document.getElementById(`v${idx + 1}`).value = val;
+        });
+    }
+
+    // Fill fraud transaction (actual fraud from dataset)
+    function fillFraudTransaction() {
+    document.getElementById('amount').value = 0.00;
+    document.getElementById('time').value = 406;
+    const fraudValues = [
+        -2.3122265423263, 1.95199201064158, -1.60985073229769, 3.9979055875468,
+        -0.522187864667764, -1.42654531920595, -2.53738730624579, 1.39165724829804,
+        -2.77008927719433, -2.77227214465915, 3.20203320709635, -2.89990738849473,
+        -0.595221881324605, -4.28925378244217, 0.389724120274487, -1.14074717980657,
+        -2.83005567450437, -0.0168224681808257, 0.416955705037907, 0.126910559061474,
+        0.517232370861764, -0.0350493686052974, -0.465211076182388, 0.320198198514526,
+        0.0445191674731724, 0.177839798284401, 0.261145002567677, -0.143275874698919
+    ];
+    fraudValues.forEach((val, idx) => {
+        document.getElementById(`v${idx + 1}`).value = val;
+    });
+}
+
+    // Submit form
+    async function submitForm() {
+        const body = {
+            amount: document.getElementById('amount').value,
+            time: document.getElementById('time').value,
+        };
+        for (let i = 1; i <= 28; i++) {
+            body[`v${i}`] = document.getElementById(`v${i}`).value || 0;
+        }
+
+        const resultBox = document.getElementById('result');
+        resultBox.className = 'mt-8 p-6 rounded-xl text-center bg-gray-100';
+        resultBox.innerHTML = '⏳ Analyzing transaction...';
+
+        try {
+            const response = await fetch('/predict/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+
+            if (data.is_fraud) {
+                resultBox.className = 'mt-8 p-6 rounded-xl text-center bg-red-50 border-2 border-red-300';
+                resultBox.innerHTML = `
+                    <div class="text-4xl mb-2">🚨</div>
+                    <div class="text-2xl font-bold text-red-600 mb-2">FRAUD DETECTED</div>
+                    <div class="text-gray-600 mb-4">Confidence: <strong>${data.confidence}%</strong></div>
+                    <div class="text-left bg-red-100 rounded-lg p-4">
+                        <p class="font-semibold text-red-700 mb-2">Top 3 Fraud Indicators:</p>
+                        ${data.top_features.map(f => `<p class="text-sm text-red-600">• ${f.feature}: ${f.importance}% importance</p>`).join('')}
+                    </div>
+                `;
+            } else {
+                resultBox.className = 'mt-8 p-6 rounded-xl text-center bg-green-50 border-2 border-green-300';
+                resultBox.innerHTML = `
+                    <div class="text-4xl mb-2">✅</div>
+                    <div class="text-2xl font-bold text-green-600 mb-2">TRANSACTION IS SAFE</div>
+                    <div class="text-gray-600 mb-4">Confidence: <strong>${data.confidence}%</strong></div>
+                    <div class="text-left bg-green-100 rounded-lg p-4">
+                        <p class="font-semibold text-green-700 mb-2">Top 3 Checked Features:</p>
+                        ${data.top_features.map(f => `<p class="text-sm text-green-600">• ${f.feature}: ${f.importance}% importance</p>`).join('')}
+                    </div>
+                `;
+            }
+        } catch (err) {
+            resultBox.className = 'mt-8 p-6 rounded-xl text-center bg-yellow-50 border-2 border-yellow-300';
+            resultBox.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+        }
+    }
+</script>
+
+{% endblock %}

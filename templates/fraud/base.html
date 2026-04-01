@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud Detection System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-700 text-white px-6 py-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">🛡️ Fraud Detection System</h1>
+            <div class="flex gap-6">
+                <a href="/" class="hover:text-blue-200">Home</a>
+                <a href="/dashboard/" class="hover:text-blue-200">Dashboard</a>
+                <a href="/history/" class="hover:text-blue-200">History</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-400 py-6 text-sm">
+        Fraud Detection System — MCA Final Year Project — Rishi Pandey
+    </footer>
+
+</body>
+</html>
